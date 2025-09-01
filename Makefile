@@ -1,15 +1,7 @@
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-    NASM_FMT = macho64
-    OSFLAG   = -DOSX
-else
-    NASM_FMT = elf64
-    OSFLAG   = -DLINUX
-endif
 
 NAME    = libasm.a
 AS      = nasm
-ASFLAGS = -f $(NASM_FMT) $(OSFLAG)
+ASFLAGS = -f elf64
 CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror
 

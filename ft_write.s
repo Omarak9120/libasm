@@ -1,37 +1,20 @@
-global ft_write
-section .text
+global ft_write                     ; Export function name for linker to find
+extern __errno_location             ; Import external function to get errno address
 
-%ifdef LINUX
-extern __errno_location
+section .text                       ; Code section (executable instructions)
 ; ssize_t ft_write(int fd, const void *buf, size_t count)
-ft_write:
-    mov     rax, 1              ; Linux SYS_write
-    syscall
-    cmp     rax, 0
-    jl      .err_linux
-    ret
-.err_linux:
-    neg     rax                 ; rax = errno
-    mov     edi, eax
-    ; *** PIE-safe call via PLT ***
-    call    __errno_location wrt ..plt
-    mov     [rax], edi
-    mov     rax, -1
+ft_write:                           ; Function entry point (label)
+    mov     rax, 1                 ; rax = 1 (Linux syscall number for write)
+    syscall                         ; Make system call (kernel function)
+    cmp     rax, 0                 ; Compare return value with 0
+    jl      .err_linux             ; If less than 0 (error), jump to error handler
+    ret                            ; Success: return (rax contains bytes written)
+.err_linux:                        ; Linux error handling (jump target)
+    neg     rax                    ; rax = -rax (make positive for errno)
+    mov     edi, eax               ; edi = errno value (parameter for __errno_location)
+    call    __errno_location wrt ..plt  ; Get errno address (PIE-safe external call)
+    mov     [rax], edi             ; Set errno = error value (store at returned address)
+    mov     rax, -1                ; Return -1 (error indicator)
     ret
 
-%else                           ; macOS
-extern ___error
-ft_write:
-    mov     rax, 0x2000004      ; macOS SYS_write
-    syscall
-    jc      .err_osx
-    ret
-.err_osx:
-    mov     edi, eax
-    call    ___error
-    mov     [rax], edi
-    mov     rax, -1
-    ret
-%endif
-
-section .note.GNU-stack noalloc
+section .note.GNU-stack noalloc     ; Security: mark stack as non-executable
