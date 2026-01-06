@@ -1,1 +1,1 @@
-omar
+gcc -Wall -Wextra -Werror -I. main.c -L. -lasm -o tester

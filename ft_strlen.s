@@ -12,4 +12,4 @@ ft_strlen:                         ; Function entry point (label)
     mov     rax, rcx               ; rax = rcx (return counter value in rax)
     ret                             ; Return from function (rax contains length)
 
-section .note.GNU-stack noalloc     ; Security: mark stack as non-executable
+section .note.GNU-stack noalloc     ; Security: mark stack as non-executable 
